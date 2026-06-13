@@ -1363,7 +1363,7 @@ public static class ProfileManager
         }
 
         // Extract profile name without extension to match all backup files regardless of extension
-        // (e.g., "Default" matches "2025-01-19_Default.json", "2025-01-19_Default.encrypted", etc.)
+        // (e.g., "Default" matches "2026-06-13_Default.json", "2026-06-13_Default.encrypted", etc.)
         var profileNameWithoutExtension = Path.GetFileNameWithoutExtension(profileFileName);
 
         // Get all backup files for this specific profile (any extension) sorted by timestamp (newest first)

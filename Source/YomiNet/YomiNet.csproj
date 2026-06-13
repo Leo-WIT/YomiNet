@@ -16,9 +16,9 @@
 		<ApplicationIcon>YomiNet.ico</ApplicationIcon>		
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-        <Authors>BornToBeRoot</Authors>
-        <PackageProjectUrl>https://github.com/BornToBeRoot/YomiNet</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/BornToBeRoot/YomiNet</RepositoryUrl>
+        <Authors>Leo-WIT</Authors>
+        <PackageProjectUrl>https://github.com/Leo-WIT/YomiNet</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Leo-WIT/YomiNet</RepositoryUrl>
         <PackageLicenseFile>YomiNet.txt</PackageLicenseFile>
         <PackageIcon>YomiNet.ico</PackageIcon>
         <SatelliteResourceLanguages>zh-CN;zh-TW</SatelliteResourceLanguages>

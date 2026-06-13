@@ -390,7 +390,7 @@ public static class SettingsManager
     private static void CleanupBackups(string backupFolderPath, string settingsFileName, int maxBackupFiles)
     {
         // Extract settings name without extension to match all backup files regardless of extension
-        // (e.g., "Settings" matches "2025-01-19_Settings.json", "2025-01-19_Settings.xml")
+        // (e.g., "Settings" matches "2026-06-13_Settings.json", "2026-06-13_Settings.xml")
         var settingsNameWithoutExtension = Path.GetFileNameWithoutExtension(settingsFileName);
 
         // Get all backup files for settings (any extension) sorted by timestamp (newest first)
@@ -484,8 +484,8 @@ public static class SettingsManager
         if (fromVersion < new Version(2025, 8, 11, 0))
             UpgradeTo_2025_8_11_0();
 
-        // 2026.2.22.0
-        if (fromVersion < new Version(2026, 2, 22, 0))
+        // 2026.6.13.0
+        if (fromVersion < new Version(2026, 6, 13, 0))
             UpgradeTo_2026_2_22_0();
 
         // Latest
@@ -619,11 +619,11 @@ public static class SettingsManager
     }
 
     /// <summary>
-    ///     Method to apply changes for version 2026.2.22.0.
+    ///     Method to apply changes for the current customized version.
     /// </summary>
     private static void UpgradeTo_2026_2_22_0()
     {
-        Log.Info("Apply upgrade to 2026.2.22.0...");
+        Log.Info("Apply upgrade to 2026.6.13.0...");
 
         // DNS Lookup
         Log.Info("Migrate DNS Lookup settings to new structure...");

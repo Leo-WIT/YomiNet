@@ -1,10 +1,10 @@
 using System.Reflection;
 
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyCopyright("Copyright © 2016-2026 BornToBeRoot")]
+[assembly: AssemblyCompany("Leo-WIT")]
+[assembly: AssemblyCopyright("Copyright © 2026 Leo-WIT")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("2026.5.30.0")]
-[assembly: AssemblyFileVersion("2026.5.30.0")]
+[assembly: AssemblyVersion("2026.6.13.0")]
+[assembly: AssemblyFileVersion("2026.6.13.0")]

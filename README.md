@@ -4,6 +4,13 @@ YomiNet 是一个面向 Windows 的网络工具箱，用于查看网络状态、
 
 本项目基于 NETworkManager 改造，保留核心网络诊断能力，并针对中文用户、局域网排查和日常桌面使用做了定制。
 
+## 版本信息
+
+- 当前版本：`2026.6.13.0`
+- 发布日期：`2026-06-13`
+- 仓库地址：[https://github.com/Leo-WIT/YomiNet](https://github.com/Leo-WIT/YomiNet)
+
+
 ## 主要功能
 
 - 仪表盘：显示本机公网 IP、局域网 IP、DNS 解析器、网络接口等状态。
@@ -61,7 +68,6 @@ Source/                 主程序与类库源码
 Website/                文档网站源码
 Images/                 图标与图片资源
 Scripts/                构建和资源生成脚本
-Chocolatey/             Chocolatey 打包文件
 ```
 
 ## 说明
