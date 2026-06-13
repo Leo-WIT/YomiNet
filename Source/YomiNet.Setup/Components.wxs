@@ -1,0 +1,35 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Fragment>
+        <ComponentGroup Id="Components" Directory="INSTALLFOLDER">
+            <!-- Include all files in output -->
+            <Files Include="$(var.YomiNet.TargetDir)**">
+                <Exclude Files="$(var.YomiNet.TargetDir)**\*.pdb"/>
+                <Exclude Files="$(var.YomiNet.TargetDir)WebView2Loader.dll"/>
+                <Exclude Files="$(var.YomiNet.TargetDir)YomiNet.exe"/>
+            </Files>
+
+            <!-- YomiNet executable -->
+            <Component>
+                <File Id="YomiNetExecutable"
+                      Source="$(var.YomiNet.TargetDir)YomiNet.exe">
+                    <!-- Start menu shortcut -->
+                    <Shortcut Name="YomiNet"
+                              Directory="ProgramMenuFolder"
+                              Advertise="true"
+                              Icon="icon.ico"
+                              Description="A powerful open-source tool for managing networks and troubleshooting network problems!"/>
+                </File>
+            </Component>
+
+            <!-- Desktop shortcut -->
+            <Component Directory="DesktopFolder">
+                <RegistryValue Root="HKCU" Key="SOFTWARE\YomiNet" Name="DesktopShortcutEnabled" Value="1"/>
+                <Shortcut Name="YomiNet"
+                          Directory="DesktopFolder"
+                          Target="[#YomiNetExecutable]"
+                          Icon="icon.ico"
+                          Description="A powerful open-source tool for managing networks and troubleshooting network problems!"/>
+            </Component>
+        </ComponentGroup>
+    </Fragment>
+</Wix>

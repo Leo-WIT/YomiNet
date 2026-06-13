@@ -1,0 +1,455 @@
+﻿using Dragablz;
+using YomiNet.Localization;
+using YomiNet.Localization.Resources;
+using YomiNet.Models;
+using YomiNet.Models.RemoteDesktop;
+using YomiNet.Settings;
+using YomiNet.Utilities;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Input;
+using System.Windows.Interop;
+
+namespace YomiNet.Controls;
+
+public sealed partial class DragablzTabHostWindow : INotifyPropertyChanged
+{
+    #region Constructor
+
+    public DragablzTabHostWindow(ApplicationName applicationName)
+    {
+        InitializeComponent();
+        DataContext = this;
+
+        ApplicationName = applicationName;
+
+        InterTabClient = new DragablzInterTabClient(applicationName);
+        InterTabPartition = applicationName.ToString();
+
+        Title =
+            $"YomiNet {AssemblyManager.Current.Version} - {ResourceTranslator.Translate(ResourceIdentifier.ApplicationName, applicationName)}";
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async void FocusEmbeddedWindow()
+    {
+        // Delay the focus to prevent blocking the ui
+        // Detect if window is resizing
+        do
+        {
+            await Task.Delay(250);
+        } while (Control.MouseButtons == MouseButtons.Left);
+
+        /* Don't continue if
+           - Header ContextMenu is opened
+        */
+        if (HeaderContextMenuIsOpen)
+            return;
+
+        // Return if the application is not an embedded window
+        if (!_embeddedWindowApplicationNames.Contains(ApplicationName))
+            return;
+
+        // Find all TabablzControl in the active window
+        foreach (var tabablzControl in VisualTreeHelper.FindVisualChildren<TabablzControl>(this))
+        {
+            // Skip if no items
+            if (tabablzControl.Items.Count == 0)
+                continue;
+
+            // Focus embedded window in the selected tab
+            (((DragablzTabItem)tabablzControl.SelectedItem)?.View as IEmbeddedWindow)?.FocusEmbeddedWindow();
+
+            break;
+        }
+    }
+
+    #endregion
+
+    #region PropertyChangedEventHandler
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    #endregion
+
+    #region Variables
+
+    public IInterTabClient InterTabClient { get; }
+
+    private readonly HashSet<ApplicationName> _embeddedWindowApplicationNames =
+    [
+        ApplicationName.PowerShell,
+        ApplicationName.PuTTY
+    ];
+
+    public ApplicationName ApplicationName
+    {
+        get;
+        set
+        {
+            if (value == field)
+                return;
+
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string InterTabPartition
+    {
+        get;
+        set
+        {
+            if (value == field)
+                return;
+
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool HeaderContextMenuIsOpen
+    {
+        get;
+        set
+        {
+            if (value == field)
+                return;
+
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    #endregion
+
+    #region ICommand & Actions
+
+    public ItemActionCallback CloseItemCommand => CloseItemAction;
+
+    private void CloseItemAction(ItemActionCallbackArgs<TabablzControl> args)
+    {
+        ((IDragablzTabItem)((DragablzTabItem)args.DragablzItem.Content).View).CloseTab();
+    }
+
+    #region RemoteDesktop commands
+
+    private bool RemoteDesktop_IsConnected_CanExecute(object view)
+    {
+        if (view is RemoteDesktopControl control)
+            return control.IsConnected;
+
+        return false;
+    }
+
+    private bool RemoteDesktop_IsDisconnected_CanExecute(object view)
+    {
+        if (view is RemoteDesktopControl control)
+            return !control.IsConnected && !control.IsConnecting;
+
+        return false;
+    }
+
+    public ICommand RemoteDesktop_DisconnectCommand =>
+        new RelayCommand(RemoteDesktop_DisconnectAction, RemoteDesktop_IsConnected_CanExecute);
+
+    private void RemoteDesktop_DisconnectAction(object view)
+    {
+        if (view is RemoteDesktopControl control)
+            if (control.DisconnectCommand.CanExecute(null))
+                control.DisconnectCommand.Execute(null);
+    }
+
+    public ICommand RemoteDesktop_ReconnectCommand =>
+        new RelayCommand(RemoteDesktop_ReconnectAction, RemoteDesktop_IsDisconnected_CanExecute);
+
+    private void RemoteDesktop_ReconnectAction(object view)
+    {
+        if (view is RemoteDesktopControl control)
+            if (control.ReconnectCommand.CanExecute(null))
+                control.ReconnectCommand.Execute(null);
+    }
+
+    public ICommand RemoteDesktop_FullscreenCommand =>
+        new RelayCommand(RemoteDesktop_FullscreenAction, RemoteDesktop_IsConnected_CanExecute);
+
+    private void RemoteDesktop_FullscreenAction(object view)
+    {
+        if (view is RemoteDesktopControl control)
+            control.FullScreen();
+    }
+
+    public ICommand RemoteDesktop_AdjustScreenCommand =>
+        new RelayCommand(RemoteDesktop_AdjustScreenAction, RemoteDesktop_IsConnected_CanExecute);
+
+    private void RemoteDesktop_AdjustScreenAction(object view)
+    {
+        if (view is RemoteDesktopControl control)
+            control.AdjustScreen(force: true);
+    }
+
+    public ICommand RemoteDesktop_SendCtrlAltDelCommand =>
+        new RelayCommand(RemoteDesktop_SendCtrlAltDelAction, RemoteDesktop_IsConnected_CanExecute);
+
+    private async void RemoteDesktop_SendCtrlAltDelAction(object view)
+    {
+        if (view is not RemoteDesktopControl control)
+            return;
+
+        try
+        {
+            control.SendKey(Keystroke.CtrlAltDel);
+        }
+        catch (Exception ex)
+        {
+            //ConfigurationManager.OnDialogOpen();
+
+            // Use built-in message box because we have visual issues in the dragablz window
+            System.Windows.MessageBox.Show($"{Strings.CouldNotSendKeystroke}\n\nMessage:\n{ex.Message}", Strings.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+
+            //ConfigurationManager.OnDialogClose();
+        }
+    }
+
+    #endregion
+
+    #region PowerShell commands
+
+    private bool PowerShell_IsConnected_CanExecute(object view)
+    {
+        if (view is PowerShellControl control)
+            return control.IsConnected;
+
+        return false;
+    }
+
+    public ICommand PowerShell_ReconnectCommand => new RelayCommand(PowerShell_ReconnectAction);
+
+    private void PowerShell_ReconnectAction(object view)
+    {
+        if (view is PowerShellControl control)
+            if (control.ReconnectCommand.CanExecute(null))
+                control.ReconnectCommand.Execute(null);
+    }
+
+    public ICommand PowerShell_ResizeWindowCommand =>
+        new RelayCommand(PowerShell_ResizeWindowAction, PowerShell_IsConnected_CanExecute);
+
+    private void PowerShell_ResizeWindowAction(object view)
+    {
+        if (view is PowerShellControl control)
+            control.ResizeEmbeddedWindow();
+    }
+
+    #endregion
+
+    #region PuTTY commands
+
+    private bool PuTTY_IsConnected_CanExecute(object view)
+    {
+        if (view is PuTTYControl control)
+            return control.IsConnected;
+
+        return false;
+    }
+
+    public ICommand PuTTY_ReconnectCommand => new RelayCommand(PuTTY_ReconnectAction);
+
+    private void PuTTY_ReconnectAction(object view)
+    {
+        if (view is PuTTYControl control)
+            if (control.ReconnectCommand.CanExecute(null))
+                control.ReconnectCommand.Execute(null);
+    }
+
+    public ICommand PuTTY_ResizeWindowCommand =>
+        new RelayCommand(PuTTY_ResizeWindowAction, PuTTY_IsConnected_CanExecute);
+
+    private void PuTTY_ResizeWindowAction(object view)
+    {
+        if (view is PuTTYControl control)
+            control.ResizeEmbeddedWindow();
+    }
+
+    public ICommand PuTTY_RestartSessionCommand =>
+        new RelayCommand(PuTTY_RestartSessionAction, PuTTY_IsConnected_CanExecute);
+
+    private void PuTTY_RestartSessionAction(object view)
+    {
+        if (view is PuTTYControl control)
+            control.RestartSession();
+    }
+
+    #endregion
+
+    #region TigerVNC commands
+
+    public ICommand TigerVNC_ReconnectCommand => new RelayCommand(TigerVNC_ReconnectAction);
+
+    private void TigerVNC_ReconnectAction(object view)
+    {
+        if (view is TigerVNCControl control)
+            if (control.ReconnectCommand.CanExecute(null))
+                control.ReconnectCommand.Execute(null);
+    }
+
+    #endregion
+
+    #region WebConsole commands
+
+    public ICommand WebConsole_ReloadCommand => new RelayCommand(WebConsole_RefreshAction);
+
+    private void WebConsole_RefreshAction(object view)
+    {
+        if (view is WebConsoleControl control)
+            if (control.ReloadCommand.CanExecute(null))
+                control.ReloadCommand.Execute(null);
+    }
+
+    #endregion
+
+    #endregion
+
+    #region Events
+
+    private void MetroWindow_Activated(object sender, EventArgs e)
+    {
+        FocusEmbeddedWindow();
+    }
+
+    private void DragablzTabHostWindow_OnClosing(object sender, CancelEventArgs e)
+    {
+        // Find all TabablzControl in the active window
+        foreach (var tabablzControl in VisualTreeHelper.FindVisualChildren<TabablzControl>(this))
+            foreach (var tabItem in tabablzControl.Items.OfType<DragablzTabItem>())
+                ((IDragablzTabItem)tabItem.View).CloseTab();
+
+        // Reset the dragging state
+        switch (ApplicationName)
+        {
+            case ApplicationName.RemoteDesktop:
+                ConfigurationManager.Current.IsRemoteDesktopWindowDragging = false;
+                break;
+            case ApplicationName.PowerShell:
+                ConfigurationManager.Current.IsPowerShellWindowDragging = false;
+                break;
+            case ApplicationName.PuTTY:
+                ConfigurationManager.Current.IsPuTTYWindowDragging = false;
+                break;
+            case ApplicationName.TigerVNC:
+                ConfigurationManager.Current.IsTigerVNCWindowDragging = false;
+                break;
+            case ApplicationName.WebConsole:
+                ConfigurationManager.Current.IsWebConsoleWindowDragging = false;
+                break;
+        }
+    }
+
+    private void TabablzControl_OnIsDraggingWindowChanged(object sender, RoutedPropertyChangedEventArgs<bool> e)
+    {
+        // Set the dragging state
+        switch (ApplicationName)
+        {
+            case ApplicationName.RemoteDesktop:
+                ConfigurationManager.Current.IsRemoteDesktopWindowDragging = e.NewValue;
+                break;
+            case ApplicationName.PowerShell:
+                ConfigurationManager.Current.IsPowerShellWindowDragging = e.NewValue;
+                break;
+            case ApplicationName.PuTTY:
+                ConfigurationManager.Current.IsPuTTYWindowDragging = e.NewValue;
+                break;
+            case ApplicationName.TigerVNC:
+                ConfigurationManager.Current.IsTigerVNCWindowDragging = e.NewValue;
+                break;
+            case ApplicationName.WebConsole:
+                ConfigurationManager.Current.IsWebConsoleWindowDragging = e.NewValue;
+                break;
+        }
+    }
+
+    #endregion
+
+    #region Handle WndProc messages (handle window size events)
+
+    private HwndSource _hwndSource;
+
+    private const int WmExitSizeMove = 0x232;
+    private const int WmSysCommand = 0x0112;
+    private const int ScMaximize = 0xF030;
+    private const int ScRestore = 0xF120;
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        _hwndSource = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+        _hwndSource?.AddHook(HwndHook);
+    }
+
+    [DebuggerStepThrough]
+    private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        // Window size events
+        switch (msg)
+        {
+            // Handle window resize and move events
+            case WmExitSizeMove:
+                UpdateOnWindowResize();
+                break;
+
+            // Handle system commands (like maximize and restore)
+            case WmSysCommand:
+
+                switch (wParam.ToInt32())
+                {
+                    // Window is maximized
+                    case ScMaximize:
+                    // Window is restored (back to normal size from maximized state)
+                    case ScRestore:
+                        UpdateOnWindowResize();
+                        break;
+                }
+
+                break;
+        }
+
+        handled = false;
+
+        return IntPtr.Zero;
+    }
+
+    private void UpdateOnWindowResize()
+    {
+        // Find all TabablzControl
+        foreach (var tabablzControl in VisualTreeHelper.FindVisualChildren<TabablzControl>(this))
+        {
+            // Skip if no items
+            if (tabablzControl.Items.Count == 0)
+                continue;
+
+            foreach (var item in tabablzControl.Items.OfType<DragablzTabItem>())
+            {
+                if (item.View is RemoteDesktopControl control)
+                    control.UpdateOnWindowResize();
+            }
+        }
+    }
+
+    #endregion
+}

@@ -1,0 +1,5 @@
+{
+  "Update_CheckForUpdatesAtStartup": false,
+  "Profiles_FolderLocation": "\\\\Server\\Shared\\YomiNet\\Profiles",
+  "Settings_FolderLocation": "%UserProfile%\\YomiNet\\Settings"
+}

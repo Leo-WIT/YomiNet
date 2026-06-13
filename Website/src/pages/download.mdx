@@ -1,0 +1,184 @@
+---
+title: Download
+description: "Download YomiNet for free — available as MSI installer, portable ZIP, or via winget and Chocolatey. Open-source network tool for Windows."
+keywords: [YomiNet download, network manager download, free network tool, Windows network manager, MSI installer, portable, winget, chocolatey]
+---
+
+import Link from "@docusaurus/Link";
+import styles from "./styles.module.css";
+import LatestPrerelease from "@site/src/components/LatestPrerelease";
+
+# Download
+
+<div style={{ display: "flex", justifyContent: "space-between" }}>
+  <div>
+    <h3>2026.2.22.0</h3>
+  </div>
+  <div>Release Date: 22.02.2026</div>
+</div>
+
+<div className={`${styles.centerButtonContainer} margin-bottom--lg`}>
+  <Link
+    className={`button button--primary button--outline ${styles.downloadButton}`}
+    to="https://github.com/BornToBeRoot/YomiNet/releases/download/2026.2.22.0/YomiNet_2026.2.22.0_Setup.msi"
+  >
+    Setup
+  </Link>
+  <Link
+    className={`button button--info button--outline ${styles.downloadButton}`}
+    to="https://github.com/BornToBeRoot/YomiNet/releases/download/2026.2.22.0/YomiNet_2026.2.22.0_Portable.zip"
+  >
+    Portable
+  </Link>
+  <Link
+    className={`button button--info button--outline ${styles.downloadButton}`}
+    to="https://github.com/BornToBeRoot/YomiNet/releases/download/2026.2.22.0/YomiNet_2026.2.22.0_Archive.zip"
+  >
+    Archive
+  </Link>
+</div>
+
+<div className={`${styles.centerButtonContainer}`}>
+  <Link
+    className={`button button--secondary button--outline ${styles.additionalButton}`}
+    to="/docs/changelog/2026-2-22-0"
+    target="_blank"
+  >
+    📃 What's new?
+  </Link>
+</div>
+
+<div className={`${styles.shieldsContainer}`}>
+  <a
+    className={`${styles.shields}`}
+    href="https://github.com/BornToBeroot/YomiNet/releases"
+    target="_blank"
+  >
+    <img
+      alt="All releases"
+      src="https://img.shields.io/github/downloads/BornToBeroot/YomiNet/total.svg?style=for-the-badge&logo=github"
+    />
+  </a>
+  <a
+    className={`${styles.shields}`}
+    href="https://github.com/BornToBeroot/YomiNet/releases/latest"
+    target="_blank"
+  >
+    <img
+      alt="Latest release"
+      src="https://img.shields.io/github/downloads/BornToBeroot/YomiNet/latest/total.svg?style=for-the-badge&logo=github"
+    />
+  </a>
+</div>
+
+
+<details className="alert alert--secondary">
+  <summary>Checksums</summary>
+  <div>
+    <p>SHA-256 checksums for the latest release:</p>
+    <b>Setup</b> (MSI Installer)
+    <pre><code>AD3A107D76B9391C88C4427717F243C64309F4D66FEA9775AAB75C1CD51A2D4E</code></pre>
+    <b>Portable</b> (ZIP Archive)
+    <pre><code>68F2B9F2908D3725633DF2CD91FE7B4D21390CE2E39457B9DBFA2AC80ABE05E8</code></pre>
+    <b>Archive</b> (ZIP Archive)
+    <pre><code>E535D411472F45420BB3C42EDA45470BD05EECA989074ED68D9F5A4290C3711D</code></pre>
+    <p>Verify a checksum using PowerShell:</p>
+    <pre><code>Get-FileHash -Path .\YomiNet_&#123;VERSION&#125;_Setup.msi -Algorithm SHA256</code></pre>
+  </div>
+</details>
+
+## Which version should I download?
+
+YomiNet is available in three different versions:
+
+| Version | Description |
+|---|---|
+| **Setup** (MSI Installer) | Recommended for most users. Installs system-wide and requires administrator privileges. Settings and profiles are stored in `~\Documents\YomiNet`. Suitable for centralized deployment via Intune, SCCM, etc. |
+| **Portable** (ZIP Archive) | Run without installation — ideal for a USB stick or network share. Settings and profiles are stored next to the executable. To upgrade, copy the `Profiles` and `Settings` directories to the new version. |
+| **Archive** (ZIP Archive) | Similar to Portable, but stores settings and profiles in `~\Documents\YomiNet`. Useful for custom deployment scenarios (e.g. Terminal Server). |
+
+## System requirements
+
+- Windows 10 / Server x64 (22H2 or later)
+- [.NET Desktop Runtime 10.0 (LTS) - x64](https://dotnet.microsoft.com/en-us/download/dotnet/10.0/runtime)
+
+## Silent install
+
+Install the Setup (MSI) silently using the following command:
+
+```
+.\YomiNet_{VERSION}_Setup.msi /quiet /norestart
+```
+
+## Enterprise Deployment / Policies
+
+YomiNet supports system-wide policies that allow administrators to enforce specific settings for all users on a machine — for example, disabling the automatic update check at startup. Policies are defined in a `config.json` file placed in the application installation directory and can be deployed via Group Policy, Intune, SCCM, or any other configuration management tool.
+
+See the [System-Wide Policies](/docs/system-wide-policies) documentation for details on available policy options and how to configure them.
+
+## Package Manager
+
+YomiNet is available through the following package managers:
+
+### Chocolatey
+
+```powershell
+# Install via Chocolatey
+choco install yominet
+```
+
+Chocolatey package: [chocolatey.org/packages/YomiNet](https://chocolatey.org/packages/YomiNet)
+
+### WinGet
+
+```powershell
+# Install via WinGet
+winget install BornToBeRoot.YomiNet
+```
+
+WinGet source: [github.com/microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/tree/master/manifests/b/BornToBeRoot/YomiNet/)
+
+### Evergreen
+
+```powershell
+# Get release via Evergreen
+Get-EvergreenApp -Name YomiNet
+
+# Get release via Evergreen and save the setup file to disk
+Get-EvergreenApp -Name YomiNet | Save-EvergreenApp -Path C:\Users\$env:Username\Downloads\
+```
+
+Evergreen PowerShell module: [github.com/aaronparker/evergreen](https://github.com/aaronparker/evergreen)
+
+## Pre-release
+
+Help improve YomiNet by testing pre-release versions with the latest features and bug fixes, and reporting any issues via [GitHub Issues](https://github.com/BornToBeRoot/YomiNet/issues/new/choose).
+
+<LatestPrerelease />
+
+:::warning
+
+Please note that pre-release versions are not as stable as regular versions and may contain more bugs.
+
+:::
+
+## Code Signing Policy
+
+YomiNet uses free code signing services from [SignPath.io](https://signpath.io/) and a free code signing certificate provided by the [SignPath Foundation](https://signpath.org/) to sign all official binaries and installers, ensuring the authenticity and integrity of your downloads.
+
+The binaries and installers are built on [AppVeyor](https://ci.appveyor.com/project/BornToBeRoot/yominet) directly from the [GitHub repository](https://github.com/BornToBeRoot/YomiNet/blob/main/appveyor.yml). After each build, the artifacts are automatically sent to [SignPath.io](https://signpath.io/) via webhook, where they are signed following manual approval by the maintainer. Once signed, the binaries are uploaded to the [GitHub releases page](https://github.com/BornToBeRoot/YomiNet/releases).
+
+## Privacy Policy
+
+Your privacy matters. YomiNet will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
+
+NETworManager has integrated some optional third-party services to enhance functionality. You can choose to enable or disable these services at the first startup or later in the settings:
+
+- [api.github.com](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement) - Check for application updates.
+- [ipify.org](https://www.ipify.org/) - Retrieve the public IP address used by the client.
+- [ip-api.com](https://ip-api.com/docs/legal) - Retrieve network information (e.g., geolocation, ISP, DNS resolver) used by the client.
+- [speed.cloudflare.com](https://www.cloudflare.com/privacypolicy/) - Measure download/upload speed, latency and jitter.
+
+## License
+
+YomiNet is licensed under the [GNU General Public License v3](https://github.com/BornToBeRoot/YomiNet/blob/main/LICENSE). Library licenses are [here](https://github.com/BornToBeRoot/YomiNet/tree/main/Source/YomiNet.Documentation/Licenses).
