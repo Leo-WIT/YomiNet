@@ -75,5 +75,5 @@ Write-Host "Replace ""[in] int32& plKeyData"" with ""[in] int32[] marshal([+0]) 
 Start-Process -FilePath $IlasmPath -ArgumentList "/dll ""$MSTSCLibILPath"" /output:""$MSTSCLibDllPath""" -Wait -NoNewWindow
 
 Write-Host "Remove temporary files..."
-Remove-Item -Path "$MSTSCLibILPath"
-Remove-Item -Path "$OutPath\MSTSCLib.res"
+Remove-Item -Path "$MSTSCLibILPath" -ErrorAction SilentlyContinue
+Remove-Item -Path "$OutPath\MSTSCLib.res" -ErrorAction SilentlyContinue
